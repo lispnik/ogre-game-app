@@ -1,0 +1,11 @@
+build/
+*.fasl
+*.fas
+*~
+.DS_Store
+
+# ocicl-vendored dependency sources; ocicl.csv pins them.
+/ocicl/
+
+# Personal signing settings.
+/local.env
