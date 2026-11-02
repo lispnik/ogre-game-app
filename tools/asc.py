@@ -12,7 +12,7 @@ that is a form in a browser, and `check` says when it is still missing.
 Needs only the standard library and openssl: the API's token is an ES256 JWT,
 signed here with the .p8 key in ~/.appstoreconnect/private_keys.  Reads
 ASC_KEY_ID, ASC_ISSUER_ID and IOS_DISTRIBUTION_PROFILE from the environment
-(source local.env first: tools/testflight.sh does).
+(it reads local.env itself).
 """
 
 import base64, json, os, subprocess, sys, time, urllib.error, urllib.request
@@ -22,6 +22,23 @@ APP_NAME = "Behemoth"
 PROFILE_NAME = "Behemoth App Store"
 CERTIFICATE = "Apple Distribution: Matthew Kennedy"
 API = "https://api.appstoreconnect.apple.com/v1"
+
+
+def load_local_env():
+    """Take settings from local.env, as a shell would source it, unless the
+    environment already has them."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local.env")
+    if os.environ.get("ASC_KEY_ID") or not os.path.exists(path):
+        return
+    out = subprocess.run(["bash", "-c", 'set -a; . "$1"; env -0', "-", path],
+                         capture_output=True, check=True).stdout.decode()
+    for entry in out.split("\0"):
+        key, _, value = entry.partition("=")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+load_local_env()
 
 
 def b64url(data):
