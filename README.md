@@ -58,6 +58,22 @@ For a device build, set `IOS_SIGNING_IDENTITY`, `IOS_DEVELOPMENT_TEAM` and
 `IOS_PROVISIONING_PROFILE` before building. `BEHEMOTH_DISTRIBUTION=1` makes
 an App Store build, and `BEHEMOTH_BUILD` sets its build number.
 
+## TestFlight
+
+Signing settings live in `local.env`, which is not committed. The headers of
+`tools/testflight.sh` and `tools/asc.py` list what goes in it.
+
+```sh
+tools/asc.py setup              # once: App ID and App Store profile, through the API
+tools/asc.py check              # is the App Store Connect app record there yet?
+tools/testflight.sh --validate   # build, check signature, validate; upload nothing
+tools/testflight.sh              # ...and upload; build number from the clock
+```
+
+The app record itself must be made once by hand at
+<https://appstoreconnect.apple.com/apps> (New App, iOS, bundle ID
+`com.burnsidemk.behemoth`), because the API cannot create it.
+
 ## Development switches
 
 Set these in the simulator's environment at launch:
@@ -83,3 +99,5 @@ SIMCTL_CHILD_BEHEMOTH_AUTOPLAY=1 xcrun simctl launch booted com.burnsidemk.behem
 | `app/view.lisp` | the SpriteKit scene: vector hexes and pieces, event playback, taps |
 | `tools/make-icon.py` | draws `res/Behemoth.xcassets` (slow: pure Python) |
 | `tools/make-sounds.py` | synthesises `res/sounds/*.wav` |
+| `tools/asc.py` | App ID, App Store profile and app-record check, via the App Store Connect API |
+| `tools/testflight.sh` | App Store build, check, validate, upload |
